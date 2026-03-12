@@ -117,9 +117,6 @@ export default function ReviewFlow({ user }) {
               Laissez votre avis sur Google Maps, puis revenez ici.
               Le coupon sera généré automatiquement à votre retour.
             </p>
-            <button className="btn btn-secondary" onClick={generateCoupon}>
-              J'ai déjà laissé mon avis - générer le coupon
-            </button>
             <a href={REVIEW_URL} target="_blank" rel="noopener noreferrer" className="btn-link block">
               Ouvrir Google Maps à nouveau
             </a>
