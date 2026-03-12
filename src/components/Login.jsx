@@ -1,18 +1,19 @@
-import { signInWithPopup, signInWithRedirect } from 'firebase/auth'
+import { signInWithPopup } from 'firebase/auth'
 import { auth, googleProvider } from '../firebase'
-
-const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
+import { useState } from 'react'
 
 export default function Login() {
+  const [error, setError] = useState(null)
+
   const handleLogin = async () => {
+    setError(null)
     try {
-      if (isMobile) {
-        await signInWithRedirect(auth, googleProvider)
-      } else {
-        await signInWithPopup(auth, googleProvider)
-      }
+      await signInWithPopup(auth, googleProvider)
     } catch (err) {
-      console.error('Erreur de connexion:', err)
+      console.error('Erreur de connexion:', err.code, err.message)
+      if (err.code !== 'auth/cancelled-popup-request' && err.code !== 'auth/popup-closed-by-browser') {
+        setError('Erreur de connexion. Réessayez.')
+      }
     }
   }
 
@@ -30,6 +31,7 @@ export default function Login() {
           </svg>
           Se connecter avec Google
         </button>
+        {error && <p className="subtitle warning" style={{ marginTop: '1rem' }}>{error}</p>}
       </div>
     </div>
   )

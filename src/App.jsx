@@ -31,9 +31,6 @@ export default function App() {
   }
 
   const isAdmin = user.email === ADMIN_EMAIL
-  console.log('User email:', user.email)
-  console.log('Admin email:', ADMIN_EMAIL)
-  console.log('isAdmin:', isAdmin)
 
   return (
     <Routes>
