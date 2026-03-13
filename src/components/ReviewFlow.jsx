@@ -39,17 +39,17 @@ export default function ReviewFlow({ user }) {
   }, [checkStatus])
 
   useEffect(() => {
-    const handleFocus = () => {
-      if (status === 'pending') {
-        generateCoupon()
-      }
+    if (status === 'pending') {
+      const handleFocus = () => generateCoupon()
+      window.addEventListener('focus', handleFocus)
+      return () => window.removeEventListener('focus', handleFocus)
     }
-    window.addEventListener('focus', handleFocus)
-    return () => window.removeEventListener('focus', handleFocus)
   }, [status])
 
   const handleWriteReview = async () => {
     try {
+      // Otwórz kartę NAJPIERW (bezpośrednio z kliknięcia, zanim przeglądarka zablokuje)
+      window.open(REVIEW_URL, '_blank')
       await setDoc(doc(db, 'coupons', docId), {
         userId: user.uid,
         userEmail: user.email,
@@ -60,7 +60,6 @@ export default function ReviewFlow({ user }) {
         createdAt: serverTimestamp(),
       })
       setStatus('pending')
-      window.open(REVIEW_URL, '_blank')
     } catch (err) {
       console.error('Erreur lors de la création:', err)
       alert('Une erreur est survenue. Veuillez réessayer.')
@@ -112,15 +111,7 @@ export default function ReviewFlow({ user }) {
         )}
 
         {status === 'pending' && (
-          <>
-            <p className="subtitle">
-              Laissez votre avis sur Google Maps, puis revenez ici.
-              Le coupon sera généré automatiquement à votre retour.
-            </p>
-            <a href={REVIEW_URL} target="_blank" rel="noopener noreferrer" className="btn-link block">
-              Ouvrir Google Maps à nouveau
-            </a>
-          </>
+          <div className="spinner" />
         )}
 
         {status === 'has_coupon' && <Coupon code={couponCode} />}
