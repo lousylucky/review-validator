@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
-import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore'
+import { doc, getDoc, setDoc, addDoc, collection, serverTimestamp } from 'firebase/firestore'
 import { signOut } from 'firebase/auth'
-import { db, auth, REVIEW_URL, PLACE_ID } from '../firebase'
+import { db, auth, REVIEW_URL, PLACE_ID, ADMIN_EMAIL } from '../firebase'
 import Coupon from './Coupon'
 
 export default function ReviewFlow({ user }) {
@@ -15,7 +15,9 @@ export default function ReviewFlow({ user }) {
       const snap = await getDoc(doc(db, 'coupons', docId))
       if (snap.exists()) {
         const data = snap.data()
-        if (data.couponCode && data.couponUsed) {
+        if (data.status === 'rejected') {
+          setStatus('rejected')
+        } else if (data.couponCode && data.couponUsed) {
           setStatus('used')
         } else if (data.couponCode) {
           setStatus('has_coupon')
@@ -38,17 +40,8 @@ export default function ReviewFlow({ user }) {
     checkStatus()
   }, [checkStatus])
 
-  useEffect(() => {
-    if (status === 'pending') {
-      const handleFocus = () => generateCoupon()
-      window.addEventListener('focus', handleFocus)
-      return () => window.removeEventListener('focus', handleFocus)
-    }
-  }, [status])
-
   const handleWriteReview = async () => {
     try {
-      // Otwórz kartę NAJPIERW (bezpośrednio z kliknięcia, zanim przeglądarka zablokuje)
       window.open(REVIEW_URL, '_blank')
       await setDoc(doc(db, 'coupons', docId), {
         userId: user.uid,
@@ -57,31 +50,23 @@ export default function ReviewFlow({ user }) {
         userPhoto: user.photoURL,
         placeId: PLACE_ID,
         reviewStarted: true,
+        status: 'pending',
         createdAt: serverTimestamp(),
       })
       setStatus('pending')
+      // Email do admina — nie blokuje głównego flow
+      addDoc(collection(db, 'mail'), {
+        to: ADMIN_EMAIL,
+        message: {
+          subject: `Nouvel avis - ${user.displayName}`,
+          html: `<p><strong>${user.displayName}</strong> (${user.email}) a soumis une demande de coupon.</p>
+                 <p>Connectez-vous au panneau d'administration pour valider ou refuser cette demande.</p>`,
+        },
+      }).catch(() => {})
     } catch (err) {
       console.error('Erreur lors de la création:', err)
       alert('Une erreur est survenue. Veuillez réessayer.')
     }
-  }
-
-  const generateCoupon = async () => {
-    const code = 'LGS-' + Math.random().toString(36).substring(2, 8).toUpperCase()
-    await setDoc(doc(db, 'coupons', docId), {
-      userId: user.uid,
-      userEmail: user.email,
-      userName: user.displayName,
-      userPhoto: user.photoURL,
-      placeId: PLACE_ID,
-      couponCode: code,
-      couponUsed: false,
-      reviewStarted: true,
-      createdAt: serverTimestamp(),
-      couponGeneratedAt: serverTimestamp(),
-    })
-    setCouponCode(code)
-    setStatus('has_coupon')
   }
 
   const handleLogout = () => signOut(auth)
@@ -107,11 +92,16 @@ export default function ReviewFlow({ user }) {
             <button className="btn btn-primary" onClick={handleWriteReview}>
               Écrire un avis
             </button>
+            <p className="subtitle" style={{ marginTop: '1rem', fontSize: '0.8rem' }}>
+              Pour revenir après avoir ajouté un avis, scannez le QR code à nouveau.
+            </p>
           </>
         )}
 
         {status === 'pending' && (
-          <div className="spinner" />
+          <p className="subtitle">
+            Votre demande est en cours de vérification. Vous recevrez votre coupon une fois l'avis validé par notre équipe.
+          </p>
         )}
 
         {status === 'has_coupon' && <Coupon code={couponCode} />}
@@ -119,6 +109,12 @@ export default function ReviewFlow({ user }) {
         {status === 'used' && (
           <p className="subtitle warning">
             Votre coupon a déjà été utilisé. Merci pour votre avis !
+          </p>
+        )}
+
+        {status === 'rejected' && (
+          <p className="subtitle warning">
+            Votre demande a été refusée. Veuillez vérifier que vous avez bien laissé un avis sur Google Maps.
           </p>
         )}
 

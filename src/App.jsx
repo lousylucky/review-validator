@@ -34,8 +34,9 @@ export default function App() {
 
   return (
     <Routes>
-      <Route path="/admin" element={isAdmin ? <AdminPanel user={user} /> : <Navigate to="/" />} />
-      <Route path="*" element={isAdmin ? <Navigate to="/admin" /> : <ReviewFlow user={user} />} />
+      <Route path="/admin" element={isAdmin ? <AdminPanel user={user} /> : <Navigate to="/" replace />} />
+      <Route path="/" element={isAdmin ? <AdminPanel user={user} /> : <ReviewFlow user={user} />} />
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   )
 }
