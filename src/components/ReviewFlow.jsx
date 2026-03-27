@@ -9,7 +9,8 @@ import LangSwitcher from './LangSwitcher'
 export default function ReviewFlow({ user, salon }) {
   const [status, setStatus] = useState('loading')
   const [couponCode, setCouponCode] = useState(null)
-  const { t } = useLang()
+  const { t, lang } = useLang()
+  const reward = salon[`reward_${lang}`] || salon.reward
 
   const docId = user.uid
   const reviewUrl = `https://search.google.com/local/writereview?placeid=${salon.placeId}`
@@ -92,7 +93,7 @@ export default function ReviewFlow({ user, salon }) {
           {status === 'eligible' && (
             <>
               <p className="text-base-content/60">
-                {t.writeReviewHint} <strong className="text-primary">{salon.reward}</strong> !
+                {t.writeReviewHint} <strong className="text-primary">{reward}</strong> !
               </p>
               <button className="btn btn-primary w-full" onClick={handleWriteReview}>
                 {t.writeReview}
@@ -107,7 +108,7 @@ export default function ReviewFlow({ user, salon }) {
             </div>
           )}
 
-          {status === 'has_coupon' && <Coupon code={couponCode} reward={salon.reward} />}
+          {status === 'has_coupon' && <Coupon code={couponCode} reward={reward} />}
 
           {status === 'used' && (
             <div className="alert alert-warning"><span>{t.used}</span></div>

@@ -6,7 +6,8 @@ import LangSwitcher from './LangSwitcher'
 
 export default function Login({ salon }) {
   const [error, setError] = useState(null)
-  const { t } = useLang()
+  const { t, lang } = useLang()
+  const reward = salon[`reward_${lang}`] || salon.reward
 
   const handleLogin = async () => {
     setError(null)
@@ -26,7 +27,7 @@ export default function Login({ salon }) {
         <div className="card-body items-center text-center">
           <LangSwitcher />
           <h1 className="card-title text-primary text-2xl">{salon.name}</h1>
-          <p className="text-base-content/60">{t.loginSubtitle} {salon.reward}.</p>
+          <p className="text-base-content/60">{t.loginSubtitle} {reward}.</p>
           <button className="btn btn-neutral w-full mt-4 gap-2" onClick={handleLogin}>
             <svg width="20" height="20" viewBox="0 0 48 48">
               <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
