@@ -1,18 +1,21 @@
 import { useState, useEffect, useCallback } from 'react'
 import { doc, getDoc, setDoc, addDoc, collection, serverTimestamp } from 'firebase/firestore'
 import { signOut } from 'firebase/auth'
-import { db, auth, REVIEW_URL, PLACE_ID, ADMIN_EMAIL } from '../firebase'
+import { db, auth } from '../firebase'
+import { useLang } from '../context/LangContext'
 import Coupon from './Coupon'
 
-export default function ReviewFlow({ user }) {
+export default function ReviewFlow({ user, salon }) {
   const [status, setStatus] = useState('loading')
   const [couponCode, setCouponCode] = useState(null)
+  const { t } = useLang()
 
-  const docId = `${user.uid}_${PLACE_ID}`
+  const docId = user.uid
+  const reviewUrl = `https://search.google.com/local/writereview?placeid=${salon.placeId}`
 
   const checkStatus = useCallback(async () => {
     try {
-      const snap = await getDoc(doc(db, 'coupons', docId))
+      const snap = await getDoc(doc(db, 'salons', salon.id, 'coupons', docId))
       if (snap.exists()) {
         const data = snap.data()
         if (data.status === 'rejected') {
@@ -31,10 +34,10 @@ export default function ReviewFlow({ user }) {
         setStatus('eligible')
       }
     } catch (err) {
-      console.error('Erreur de vérification:', err)
+      console.error('Check status error:', err)
       setStatus('eligible')
     }
-  }, [docId])
+  }, [docId, salon.id])
 
   useEffect(() => {
     checkStatus()
@@ -42,87 +45,80 @@ export default function ReviewFlow({ user }) {
 
   const handleWriteReview = async () => {
     try {
-      window.open(REVIEW_URL, '_blank')
-      await setDoc(doc(db, 'coupons', docId), {
+      window.open(reviewUrl, '_blank')
+      await setDoc(doc(db, 'salons', salon.id, 'coupons', docId), {
         userId: user.uid,
         userEmail: user.email,
         userName: user.displayName,
         userPhoto: user.photoURL,
-        placeId: PLACE_ID,
+        placeId: salon.placeId,
         reviewStarted: true,
         status: 'pending',
         createdAt: serverTimestamp(),
       })
       setStatus('pending')
-      // Email do admina — nie blokuje głównego flow
       addDoc(collection(db, 'mail'), {
-        to: ADMIN_EMAIL,
+        to: salon.adminEmail,
         message: {
-          subject: `Nouvel avis - ${user.displayName}`,
-          html: `<p><strong>${user.displayName}</strong> (${user.email}) a soumis une demande de coupon.</p>
+          subject: `Nouvel avis - ${user.displayName} (${salon.name})`,
+          html: `<p><strong>${user.displayName}</strong> (${user.email}) a soumis une demande de coupon pour <strong>${salon.name}</strong>.</p>
                  <p>Connectez-vous au panneau d'administration pour valider ou refuser cette demande.</p>`,
         },
       }).catch(() => {})
     } catch (err) {
-      console.error('Erreur lors de la création:', err)
-      alert('Une erreur est survenue. Veuillez réessayer.')
+      console.error('Write review error:', err)
+      alert(t.error)
     }
   }
 
   const handleLogout = () => signOut(auth)
 
   return (
-    <div className="container">
-      <div className="card">
-        <div className="user-bar">
-          {user.photoURL && <img src={user.photoURL} alt="" className="avatar" referrerPolicy="no-referrer" />}
-          <span>{user.displayName}</span>
-          <button className="btn-link" onClick={handleLogout}>Déconnexion</button>
+    <div className="min-h-screen flex items-center justify-center p-4">
+      <div className="card bg-base-200 shadow-xl w-full max-w-sm">
+        <div className="card-body items-center text-center">
+          <div className="flex items-center gap-2 w-full mb-2">
+            {user.photoURL && <div className="avatar"><div className="w-8 rounded-full"><img src={user.photoURL} alt="" referrerPolicy="no-referrer" /></div></div>}
+            <span className="text-sm text-base-content/60">{user.displayName}</span>
+            <button className="btn btn-ghost btn-xs ml-auto" onClick={handleLogout}>{t.logout}</button>
+          </div>
+
+          <h1 className="text-2xl font-bold text-primary">{salon.name}</h1>
+
+          {status === 'loading' && <span className="loading loading-spinner loading-md text-primary" />}
+
+          {status === 'eligible' && (
+            <>
+              <p className="text-base-content/60">
+                {t.writeReviewHint} <strong className="text-primary">{salon.reward}</strong> !
+              </p>
+              <button className="btn btn-primary w-full" onClick={handleWriteReview}>
+                {t.writeReview}
+              </button>
+              <p className="text-xs text-base-content/40 mt-1">{t.qrHint}</p>
+            </>
+          )}
+
+          {status === 'pending' && (
+            <div className="alert alert-info">
+              <span>{t.pending}</span>
+            </div>
+          )}
+
+          {status === 'has_coupon' && <Coupon code={couponCode} reward={salon.reward} />}
+
+          {status === 'used' && (
+            <div className="alert alert-warning"><span>{t.used}</span></div>
+          )}
+
+          {status === 'rejected' && (
+            <div className="alert alert-error"><span>{t.rejected}</span></div>
+          )}
+
+          {status === 'blocked' && (
+            <div className="alert alert-warning"><span>{t.blocked}</span></div>
+          )}
         </div>
-
-        <h1>Le Grand Salon</h1>
-
-        {status === 'loading' && <div className="spinner" />}
-
-        {status === 'eligible' && (
-          <>
-            <p className="subtitle">
-              Laissez-nous un avis sur Google et recevez un coupon de réduction de <strong>10%</strong> !
-            </p>
-            <button className="btn btn-primary" onClick={handleWriteReview}>
-              Écrire un avis
-            </button>
-            <p className="subtitle" style={{ marginTop: '1rem', fontSize: '0.8rem' }}>
-              Pour revenir après avoir ajouté un avis, scannez le QR code à nouveau.
-            </p>
-          </>
-        )}
-
-        {status === 'pending' && (
-          <p className="subtitle">
-            Votre demande est en cours de vérification. Vous recevrez votre coupon une fois l'avis validé par notre équipe.
-          </p>
-        )}
-
-        {status === 'has_coupon' && <Coupon code={couponCode} />}
-
-        {status === 'used' && (
-          <p className="subtitle warning">
-            Votre coupon a déjà été utilisé. Merci pour votre avis !
-          </p>
-        )}
-
-        {status === 'rejected' && (
-          <p className="subtitle warning">
-            Votre demande a été refusée. Veuillez vérifier que vous avez bien laissé un avis sur Google Maps.
-          </p>
-        )}
-
-        {status === 'blocked' && (
-          <p className="subtitle warning">
-            Un coupon a déjà été généré pour ce compte. Il n'est pas possible d'en générer un autre.
-          </p>
-        )}
       </div>
     </div>
   )

@@ -1,0 +1,42 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Salons — każdy zalogowany może czytać, nikt nie może pisać (tylko admin w Console)
+    match /salons/{salonId} {
+      allow read: if request.auth != null;
+      allow write: if false;
+
+      // Coupons — użytkownik może czytać/tworzyć swój dokument, admin salonu może update'ować
+      match /coupons/{couponId} {
+        allow read: if request.auth != null
+          && (request.auth.uid == couponId
+              || request.auth.token.email == get(/databases/$(database)/documents/salons/$(salonId)).data.adminEmail);
+
+        // Użytkownik może stworzyć swój coupon (tylko swój uid)
+        allow create: if request.auth != null
+          && request.auth.uid == couponId
+          && request.resource.data.userId == request.auth.uid
+          && request.resource.data.status == 'pending';
+
+        // Tylko admin salonu może update'ować (approve/reject/markUsed)
+        allow update: if request.auth != null
+          && request.auth.token.email == get(/databases/$(database)/documents/salons/$(salonId)).data.adminEmail;
+
+        allow delete: if false;
+      }
+    }
+
+    // Mail — każdy zalogowany może tworzyć (trigger email extension), nikt nie czyta
+    match /mail/{mailId} {
+      allow create: if request.auth != null;
+      allow read, update, delete: if false;
+    }
+
+    // Wszystko inne — zablokowane
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
