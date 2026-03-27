@@ -4,6 +4,7 @@ import { signOut } from 'firebase/auth'
 import { db, auth } from '../firebase'
 import { useLang } from '../context/LangContext'
 import Coupon from './Coupon'
+import LangSwitcher from './LangSwitcher'
 
 export default function ReviewFlow({ user, salon }) {
   const [status, setStatus] = useState('loading')
@@ -82,6 +83,7 @@ export default function ReviewFlow({ user, salon }) {
             <span className="text-sm text-base-content/60">{user.displayName}</span>
             <button className="btn btn-ghost btn-xs ml-auto" onClick={handleLogout}>{t.logout}</button>
           </div>
+          <LangSwitcher />
 
           <h1 className="text-2xl font-bold text-primary">{salon.name}</h1>
 

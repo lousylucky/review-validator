@@ -3,6 +3,7 @@ import { collection, getDocs, doc, updateDoc, serverTimestamp } from 'firebase/f
 import { signOut } from 'firebase/auth'
 import { db, auth } from '../firebase'
 import { useLang } from '../context/LangContext'
+import LangSwitcher from './LangSwitcher'
 
 export default function AdminPanel({ user, salon }) {
   const [entries, setEntries] = useState([])
@@ -124,7 +125,10 @@ export default function AdminPanel({ user, salon }) {
             <h1 className="text-2xl font-bold text-primary">{salon.name}</h1>
             <p className="text-sm text-base-content/50">Admin : {user.email}</p>
           </div>
-          <button className="text-sm text-base-content/60 hover:text-primary transition-colors" onClick={handleLogout}>{t.logout}</button>
+          <div className="flex items-center gap-3">
+            <LangSwitcher />
+            <button className="text-sm text-base-content/60 hover:text-primary transition-colors" onClick={handleLogout}>{t.logout}</button>
+          </div>
         </div>
 
         {/* Search */}

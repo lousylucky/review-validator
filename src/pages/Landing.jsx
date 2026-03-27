@@ -1,57 +1,55 @@
 import { useLang } from '../context/LangContext'
+import LangSwitcher from '../components/LangSwitcher'
 
 export default function Landing() {
   const { t } = useLang()
 
   return (
-    <div className="min-h-screen" data-theme="night">
+    <div className="min-h-screen overflow-x-hidden" data-theme="night">
       {/* Navbar */}
-      <nav className="navbar max-w-6xl mx-auto px-6 py-4">
-        <div className="flex-1">
-          <span className="text-xl font-extrabold text-primary tracking-tight">ReviewValidator</span>
+      <nav className="flex items-center justify-between max-w-6xl mx-auto px-6 md:px-6 py-4">
+        <span className="text-lg md:text-xl font-extrabold text-primary tracking-tight">ReviewValidator</span>
+        <div className="flex items-center gap-2 md:gap-3">
+          <a href="mailto:contact@review-validator.com" className="btn btn-ghost btn-sm hidden md:inline-flex">{t.contact}</a>
+          <LangSwitcher />
         </div>
-        <a href="mailto:contact@review-validator.com" className="btn btn-ghost btn-sm">{t.contact}</a>
       </nav>
 
       {/* Hero */}
       <header className="text-center px-6 pt-16 pb-12 max-w-3xl mx-auto">
         <div className="badge badge-outline badge-primary mb-6">{t.heroBadge}</div>
-        <h1 className="text-4xl md:text-5xl font-extrabold leading-tight tracking-tight mb-6">
+        <h1 className="text-3xl md:text-5xl font-extrabold leading-tight tracking-tight mb-6">
           {t.heroTitle1}<br />
           {t.heroTitle2}<span className="text-primary">{t.heroTitle3}</span>
         </h1>
         <p className="text-lg text-base-content/60 leading-relaxed max-w-xl mx-auto mb-8">
           {t.heroSubtitle}
         </p>
-        <div className="flex gap-3 justify-center flex-wrap">
-          <a href="#how" className="btn btn-primary">
+        <div className="flex gap-3 justify-center flex-wrap px-4">
+          <a href="#how" className="btn btn-primary btn-sm md:btn-md">
             {t.heroCta}
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M7 17l9.2-9.2M17 17V7.8H7.8"/></svg>
           </a>
-          <a href="mailto:contact@review-validator.com" className="btn btn-outline">{t.heroDemo}</a>
+          <a href="mailto:contact@review-validator.com" className="btn btn-outline btn-sm md:btn-md">{t.heroDemo}</a>
         </div>
 
         {/* Stats */}
-        <div className="stats stats-horizontal shadow bg-base-200 mt-12">
-          <div className="stat px-6">
-            <div className="stat-value text-primary text-2xl">+300%</div>
-            <div className="stat-desc">{t.statReviews}</div>
+        <div className="grid grid-cols-2 gap-3 mt-12 max-w-xs mx-auto">
+          <div className="text-center p-3 rounded-2xl bg-base-200">
+            <div className="text-primary text-xl md:text-2xl font-bold">+300%</div>
+            <div className="text-xs text-base-content/50 mt-1">{t.statReviews}</div>
           </div>
-          <div className="stat px-6">
-            <div className="stat-value text-primary text-2xl">4.8</div>
-            <div className="stat-desc">{t.statRating}</div>
-          </div>
-          <div className="stat px-6">
-            <div className="stat-value text-primary text-2xl">2 min</div>
-            <div className="stat-desc">{t.statSetup}</div>
+          <div className="text-center p-3 rounded-2xl bg-base-200">
+            <div className="text-primary text-xl md:text-2xl font-bold">4.8</div>
+            <div className="text-xs text-base-content/50 mt-1">{t.statRating}</div>
           </div>
         </div>
       </header>
 
       {/* Phone mockups */}
-      <section className="flex justify-center items-start gap-8 px-6 py-16" style={{ perspective: '1200px' }}>
+      <section className="flex justify-center items-start gap-8 px-6 py-16 overflow-hidden" style={{ perspective: '1200px' }}>
         {/* Phone 1 — Review */}
-        <div className="w-[260px] shrink-0 rounded-[2.5rem] border border-white/10 bg-gradient-to-b from-white/[0.07] to-white/[0.02] p-3 shadow-2xl" style={{ transform: 'rotateY(-6deg) rotateX(2deg)' }}>
+        <div className="w-[220px] md:w-[260px] shrink-0 rounded-[2.5rem] border border-white/10 bg-gradient-to-b from-white/[0.07] to-white/[0.02] p-3 shadow-2xl" style={{ transform: 'rotateY(-6deg) rotateX(2deg)' }}>
           <div className="rounded-[2rem] bg-base-100 overflow-hidden">
             {/* Status bar */}
             <div className="flex items-center justify-between px-5 pt-3 pb-1">
@@ -172,10 +170,10 @@ export default function Landing() {
       </section>
 
       {/* Testimonials */}
-      <section className="max-w-5xl mx-auto px-6 py-16">
+      <section className="max-w-5xl mx-auto px-6 py-10 md:py-16">
         <div className="text-center mb-10">
           <div className="badge badge-primary badge-outline mb-3">{t.testimonialsLabel}</div>
-          <h2 className="text-3xl font-bold text-primary">{t.testimonialsTitle}</h2>
+          <h2 className="text-2xl md:text-3xl font-bold text-primary">{t.testimonialsTitle}</h2>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {[
@@ -205,13 +203,11 @@ export default function Landing() {
       </section>
 
       {/* CTA */}
-      <section className="max-w-3xl mx-auto px-6 py-16">
-        <div className="card bg-primary text-primary-content shadow-2xl">
-          <div className="card-body items-center text-center">
-            <h2 className="card-title text-2xl font-bold">{t.ctaTitle}</h2>
-            <p className="opacity-80 max-w-md">{t.ctaSubtitle}</p>
-            <a href="mailto:contact@review-validator.com" className="btn btn-neutral mt-4">{t.ctaButton}</a>
-          </div>
+      <section className="max-w-3xl mx-auto px-6 py-10 md:py-16">
+        <div className="rounded-3xl p-8 md:p-12 text-center border border-white/10 bg-base-200">
+          <h2 className="text-2xl font-bold text-primary mb-3">{t.ctaTitle}</h2>
+          <p className="text-base-content/60 max-w-md mx-auto mb-6">{t.ctaSubtitle}</p>
+          <a href="mailto:contact@review-validator.com" className="btn btn-primary">{t.ctaButton}</a>
         </div>
       </section>
 

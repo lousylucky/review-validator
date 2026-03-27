@@ -10,7 +10,7 @@ export default function LangSwitcher() {
   const { lang, changeLang } = useLang()
 
   return (
-    <div className="fixed top-4 right-4 z-50 flex gap-1 rounded-full p-1" style={{ background: 'rgba(255,255,255,0.1)' }}>
+    <div className="flex gap-1 rounded-full p-1" style={{ background: 'rgba(255,255,255,0.1)' }}>
       {langs.map((l) => (
         <button
           key={l.code}

@@ -2,6 +2,7 @@ import { signInWithPopup } from 'firebase/auth'
 import { auth, googleProvider } from '../firebase'
 import { useState } from 'react'
 import { useLang } from '../context/LangContext'
+import LangSwitcher from './LangSwitcher'
 
 export default function Login({ salon }) {
   const [error, setError] = useState(null)
@@ -23,6 +24,7 @@ export default function Login({ salon }) {
     <div className="min-h-screen flex items-center justify-center p-4">
       <div className="card bg-base-200 shadow-xl w-full max-w-sm">
         <div className="card-body items-center text-center">
+          <LangSwitcher />
           <h1 className="card-title text-primary text-2xl">{salon.name}</h1>
           <p className="text-base-content/60">{t.loginSubtitle} {salon.reward}.</p>
           <button className="btn btn-neutral w-full mt-4 gap-2" onClick={handleLogin}>
