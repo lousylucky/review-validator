@@ -3,9 +3,9 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Salons — każdy zalogowany może czytać, nikt nie może pisać (tylko admin w Console)
+    // Salons — każdy może czytać (potrzebne przed logowaniem), nikt nie może pisać (tylko admin w Console)
     match /salons/{salonId} {
-      allow read: if request.auth != null;
+      allow read: if true;
       allow write: if false;
 
       // Coupons — użytkownik może czytać/tworzyć swój dokument, admin salonu może update'ować

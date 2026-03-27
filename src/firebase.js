@@ -4,7 +4,7 @@ import { getFirestore } from 'firebase/firestore'
 
 const firebaseConfig = {
   apiKey: 'AIzaSyDOPNj4_kmgdbWfaxCWshZU1IZF6xIOwB4',
-  authDomain: 'review-validator.com',
+  authDomain: 'review-validator-5e0c7.firebaseapp.com',
   projectId: 'review-validator-5e0c7',
   storageBucket: 'review-validator-5e0c7.firebasestorage.app',
   messagingSenderId: '109860727252',
