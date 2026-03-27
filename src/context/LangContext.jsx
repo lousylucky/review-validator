@@ -56,7 +56,7 @@ const translations = {
     // CTA
     ctaTitle: 'Prêt à booster vos avis ?',
     ctaSubtitle: 'Rejoignez les entreprises qui utilisent ReviewValidator pour développer leur réputation en ligne.',
-    ctaButton: 'Commencer gratuitement',
+    ctaButton: 'Contactez-nous',
     // Footer
     rights: 'Tous droits réservés.',
     // Mockup
@@ -158,7 +158,7 @@ const translations = {
     t3Role: 'Beauty salon, Marseille',
     ctaTitle: 'Ready to boost your reviews?',
     ctaSubtitle: 'Join the businesses using ReviewValidator to grow their online reputation.',
-    ctaButton: 'Get started for free',
+    ctaButton: 'Contact us',
     rights: 'All rights reserved.',
     mockupSalon: 'My Salon',
     mockupText: 'Leave a review and get your reward!',
@@ -256,7 +256,7 @@ const translations = {
     t3Role: 'Salon kosmetyczny, Marsylia',
     ctaTitle: 'Gotowy, żeby zwiększyć liczbę opinii?',
     ctaSubtitle: 'Dołącz do firm, które używają ReviewValidator do budowania reputacji online.',
-    ctaButton: 'Zacznij za darmo',
+    ctaButton: 'Skontaktuj się z nami',
     rights: 'Wszelkie prawa zastrzeżone.',
     mockupSalon: 'Mój Salon',
     mockupText: 'Wystaw opinię i odbierz nagrodę!',
