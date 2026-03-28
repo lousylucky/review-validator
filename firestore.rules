@@ -3,28 +3,29 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
+    function isAdmin(salonId) {
+      let salon = get(/databases/$(database)/documents/salons/$(salonId)).data;
+      return request.auth != null
+        && request.auth.token.email in salon.adminEmail;
+    }
+
     // Salons — każdy może czytać (potrzebne przed logowaniem), nikt nie może pisać (tylko admin w Console)
     match /salons/{salonId} {
       allow read: if true;
       allow write: if false;
 
-      // Coupons — użytkownik może czytać/tworzyć swój dokument, admin salonu może update'ować
+      // Coupons
       match /coupons/{couponId} {
         allow read: if request.auth != null
-          && (request.auth.uid == couponId
-              || request.auth.token.email == get(/databases/$(database)/documents/salons/$(salonId)).data.adminEmail);
+          && (request.auth.uid == couponId || isAdmin(salonId));
 
-        // Użytkownik może stworzyć swój coupon (tylko swój uid)
         allow create: if request.auth != null
           && request.auth.uid == couponId
           && request.resource.data.userId == request.auth.uid
           && request.resource.data.status == 'pending';
 
-        // Tylko admin salonu może update'ować (approve/reject/markUsed)
-        allow update: if request.auth != null
-          && request.auth.token.email == get(/databases/$(database)/documents/salons/$(salonId)).data.adminEmail;
-
-        allow delete: if false;
+        allow update: if isAdmin(salonId);
+        allow delete: if isAdmin(salonId);
       }
     }
 

@@ -59,7 +59,7 @@ export default function ReviewFlow({ user, salon }) {
       })
       setStatus('pending')
       addDoc(collection(db, 'mail'), {
-        to: salon.adminEmail,
+        to: Array.isArray(salon.adminEmail) ? salon.adminEmail : [salon.adminEmail],
         message: {
           subject: `Nouvel avis - ${user.displayName} (${salon.name})`,
           html: `<p><strong>${user.displayName}</strong> (${user.email}) a soumis une demande de coupon pour <strong>${salon.name}</strong>.</p>

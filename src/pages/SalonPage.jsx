@@ -66,7 +66,8 @@ export default function SalonPage() {
     return wrap(<Login salon={salon} />)
   }
 
-  const isAdmin = user.email === salon.adminEmail
+  const adminEmails = Array.isArray(salon.adminEmail) ? salon.adminEmail : [salon.adminEmail]
+  const isAdmin = adminEmails.includes(user.email)
 
   if (isAdmin) {
     return wrap(<AdminPanel user={user} salon={salon} />)
