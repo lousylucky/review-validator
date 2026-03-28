@@ -14,7 +14,7 @@ export default function LangSwitcher() {
       {langs.map((l) => (
         <button
           key={l.code}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-semibold transition-all"
+          className="flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold transition-all"
           style={{
             background: lang === l.code ? '#e2b04a' : 'transparent',
             color: lang === l.code ? '#1a1a2e' : '#ffffff',

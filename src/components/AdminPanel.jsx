@@ -3,7 +3,6 @@ import { collection, getDocs, doc, updateDoc, serverTimestamp } from 'firebase/f
 import { signOut } from 'firebase/auth'
 import { db, auth } from '../firebase'
 import { useLang } from '../context/LangContext'
-import LangSwitcher from './LangSwitcher'
 
 export default function AdminPanel({ user, salon }) {
   const [entries, setEntries] = useState([])
@@ -125,10 +124,7 @@ export default function AdminPanel({ user, salon }) {
             <h1 className="text-2xl font-bold text-primary">{salon.name}</h1>
             <p className="text-sm text-base-content/50">Admin : {user.email}</p>
           </div>
-          <div className="flex items-center gap-3">
-            <LangSwitcher />
-            <button className="text-sm text-base-content/60 hover:text-primary transition-colors" onClick={handleLogout}>{t.logout}</button>
-          </div>
+          <button className="text-sm text-base-content/60 hover:text-primary transition-colors" onClick={handleLogout}>{t.logout}</button>
         </div>
 
         {/* Search */}
@@ -169,61 +165,46 @@ export default function AdminPanel({ user, salon }) {
         ) : (
           <div className="space-y-3">
             {filtered.map((e) => (
-              <div key={e.id} className={`flex items-center gap-4 p-4 rounded-2xl bg-base-200/60 hover:bg-base-200 transition-colors ${e.couponUsed ? 'opacity-40' : ''}`}>
-                {/* Avatar + Name */}
-                <div className="flex items-center gap-3 min-w-[160px]">
+              <div key={e.id} className={`p-4 rounded-2xl bg-base-200/60 hover:bg-base-200 transition-colors ${e.couponUsed ? 'opacity-40' : ''}`}>
+                {/* Row 1: Avatar + Name + Status + Date */}
+                <div className="flex items-center gap-3">
                   {e.userPhoto ? (
                     <div className="avatar"><div className="w-10 rounded-full ring ring-base-300"><img src={e.userPhoto} alt="" referrerPolicy="no-referrer" /></div></div>
                   ) : (
                     <div className="avatar placeholder"><div className="bg-base-300 text-base-content rounded-full w-10"><span>{(e.userName || '?')[0]}</span></div></div>
                   )}
-                  <div className="min-w-0">
+                  <div className="min-w-0 flex-1">
                     <p className="font-semibold text-sm truncate">{e.userName || '—'}</p>
                     <p className="text-xs text-base-content/50 truncate">{e.userEmail}</p>
                   </div>
+                  <span className="text-xs text-base-content/40 shrink-0">{e.createdAt ? new Date(e.createdAt.seconds * 1000).toLocaleDateString() : ''}</span>
                 </div>
-
-                {/* Status */}
-                <div className="flex items-center gap-2">
-                  <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${statusBadge(e.status)}`}>{statusLabel(e.status)}</span>
-                  {e.couponUsed && <span className="inline-block px-2 py-0.5 rounded-full text-xs bg-base-300/50 text-base-content/50 ml-1">{t.badgeUsed}</span>}
-                </div>
-
-                {/* Coupon code */}
-                <div className="hidden md:block">
-                  {e.couponCode ? (
-                    <code className="text-primary font-bold text-sm tracking-wider">{e.couponCode}</code>
-                  ) : (
-                    <span className="text-base-content/30 text-sm">—</span>
-                  )}
-                </div>
-
-                {/* Date */}
-                <div className="hidden md:block text-sm text-base-content/50">
-                  {e.createdAt ? new Date(e.createdAt.seconds * 1000).toLocaleDateString() : '—'}
-                </div>
-
-                {/* Actions */}
-                <div className="flex gap-2 ml-auto">
-                  {e.status === 'pending' && (
-                    <>
-                      <button className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-green-500/15 text-green-400 hover:bg-green-500/25 transition-colors" onClick={() => handleApprove(e)}>{t.approve}</button>
-                      <button className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-red-500/15 text-red-400 hover:bg-red-500/25 transition-colors" onClick={() => handleReject(e)}>{t.reject}</button>
-                    </>
-                  )}
-                  {e.status === 'approved' && !e.couponUsed && (
-                    confirmId === e.id ? (
+                {/* Row 2: Status + Coupon + Actions */}
+                <div className="flex items-center gap-2 mt-2 pl-13">
+                  <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold shrink-0 ${statusBadge(e.status)}`}>{statusLabel(e.status)}</span>
+                  {e.couponUsed && <span className="inline-block px-2 py-0.5 rounded-full text-xs bg-base-300/50 text-base-content/50">{t.badgeUsed}</span>}
+                  {e.couponCode && <code className="text-primary font-bold text-xs tracking-wider mx-auto">{e.couponCode}</code>}
+                  <div className="flex gap-2 ml-auto shrink-0">
+                    {e.status === 'pending' && (
                       <>
-                        <button className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-yellow-500/15 text-yellow-300 hover:bg-yellow-500/25 transition-colors" onClick={() => toggleUsed(e)}>{t.confirm}</button>
-                        <button className="px-3 py-1.5 text-xs font-semibold rounded-lg text-base-content/50 hover:text-base-content transition-colors" onClick={() => setConfirmId(null)}>{t.cancel}</button>
+                        <button className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-green-500/15 text-green-400 hover:bg-green-500/25 transition-colors" onClick={() => handleApprove(e)}>{t.approve}</button>
+                        <button className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-red-500/15 text-red-400 hover:bg-red-500/25 transition-colors" onClick={() => handleReject(e)}>{t.reject}</button>
                       </>
-                    ) : (
-                      <button className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-white/5 border border-white/10 text-base-content/70 hover:bg-white/10 transition-colors" onClick={() => toggleUsed(e)}>{t.markUsed}</button>
-                    )
-                  )}
-                  {e.status === 'rejected' && (
-                    <button className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-green-500/15 text-green-400 hover:bg-green-500/25 transition-colors" onClick={() => handleApprove(e)}>{t.approve}</button>
-                  )}
+                    )}
+                    {e.status === 'approved' && !e.couponUsed && (
+                      confirmId === e.id ? (
+                        <>
+                          <button className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-yellow-500/15 text-yellow-300 hover:bg-yellow-500/25 transition-colors" onClick={() => toggleUsed(e)}>{t.confirm}</button>
+                          <button className="px-3 py-1.5 text-xs font-semibold rounded-lg text-base-content/50 hover:text-base-content transition-colors" onClick={() => setConfirmId(null)}>{t.cancel}</button>
+                        </>
+                      ) : (
+                        <button className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-white/5 border border-white/10 text-base-content/70 hover:bg-white/10 transition-colors" onClick={() => toggleUsed(e)}>{t.markUsed}</button>
+                      )
+                    )}
+                    {e.status === 'rejected' && (
+                      <button className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-green-500/15 text-green-400 hover:bg-green-500/25 transition-colors" onClick={() => handleApprove(e)}>{t.approve}</button>
+                    )}
+                  </div>
                 </div>
               </div>
             ))}
