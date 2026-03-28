@@ -6,7 +6,7 @@ service cloud.firestore {
     function isAdmin(salonId) {
       let salon = get(/databases/$(database)/documents/salons/$(salonId)).data;
       return request.auth != null
-        && request.auth.token.email in salon.adminEmail;
+        && salon.adminEmail.hasAny([request.auth.token.email]);
     }
 
     // Salons — każdy może czytać (potrzebne przed logowaniem), nikt nie może pisać (tylko admin w Console)
